@@ -1,0 +1,5 @@
+generatorName: python
+packageName: root_io.sdk.cloud_client
+packageVersion: 1.0.0
+generateSourceCodeOnly: true
+library: asyncio
