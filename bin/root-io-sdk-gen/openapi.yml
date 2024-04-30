@@ -1,0 +1,963 @@
+openapi: 3.0.1
+info:
+  title: Root.io API
+  description: This is the API documentation for Root.io.
+  termsOfService: https://www.root.io/terms-of-service
+  contact: {}
+  version: "1.0"
+servers:
+- url: https://api.root.io/
+tags:
+- name: Account
+- name: API Keys
+- name: Organization
+- name: Invite
+- name: Inventory
+- name: Security Findings
+paths:
+  /api_keys:
+    get:
+      tags:
+      - API Keys
+      summary: List API Keys
+      description: |-
+        Get all API keys for this account, including outdated and disabled ones.
+        It will not return the key value itself, and you have no possibility to get it.
+        It is only possible to see the key when it is created.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/APIKey'
+      security:
+      - BasicAuth: []
+    post:
+      tags:
+      - API Keys
+      summary: Create API Key
+      description: |-
+        Create new API Key.
+        It's the only possibility to see the key itself.
+      requestBody:
+        description: API Key data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAPIKeyRequest'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKey'
+      security:
+      - BasicAuth: []
+      x-codegen-request-body-name: CreateAPIKeyRequest
+  /api_keys/{id}:
+    get:
+      tags:
+      - API Keys
+      summary: Show API Key
+      description: |-
+        Show API key by it's ID. Pay attention to the fact that the ID is not a key itself.
+        It will not return the key value itself, and you have no possibility to get it.
+        It is only possible to see the key when it is created.
+      parameters:
+      - name: id
+        in: path
+        description: API Key ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKey'
+      security:
+      - BasicAuth: []
+    delete:
+      tags:
+      - API Keys
+      summary: Delete API Key
+      description: Delete API key by it's ID. Pay attention to the fact that the ID
+        is not a key itself.
+      parameters:
+      - name: id
+        in: path
+        description: API Key ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Key successfully deleted
+          content: {}
+      security:
+      - BasicAuth: []
+  /me:
+    get:
+      tags:
+      - Account
+      summary: Get account information
+      description: |-
+        Get account with all needed information: account itself,
+        it's orgRoleBindings and organizations to these bindings.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+      security:
+      - BasicAuth: []
+  /orgs:
+    post:
+      tags:
+      - Organization
+      summary: Creates a new organization
+      description: |-
+        Creates a new organization with provided parameters.
+        Account on whose behalf the organization is created automatically get the admin role as orgRoleBinding.
+      requestBody:
+        description: Organization data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationRequest'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+      security:
+      - BasicAuth: []
+      x-codegen-request-body-name: CreateOrganizationRequest
+  /orgs/{orgID}/security_findings/{findingID}/comments/{commentID}:
+    put:
+      tags:
+      - Security Findings
+      summary: Update a comment to a security finding
+      description: Update a comment for a security finding.
+      parameters:
+      - name: orgID
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      - name: findingID
+        in: path
+        description: Security finding ID
+        required: true
+        schema:
+          type: string
+      - name: commentID
+        in: path
+        description: Comment ID to update
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Comment data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/securityfindings.commentRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityFindingResource'
+      security:
+      - BasicAuth: []
+      x-codegen-request-body-name: commentRequest
+    delete:
+      tags:
+      - Security Findings
+      summary: Delete a comment from a security finding
+      description: Delete a comment from a security finding
+      parameters:
+      - name: orgID
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      - name: findingID
+        in: path
+        description: Security finding ID
+        required: true
+        schema:
+          type: string
+      - name: commentID
+        in: path
+        description: Comment ID to delete
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityFindingResource'
+      security:
+      - BasicAuth: []
+  /orgs/{org_id}:
+    get:
+      tags:
+      - Organization
+      summary: Get organization by ID
+      description: Get an organization by its ID.
+      parameters:
+      - name: org_id
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+      security:
+      - BasicAuth: []
+  /orgs/{org_id}/inventory/image_builds:
+    get:
+      tags:
+      - Inventory
+      summary: List images' builds
+      description: Retrieves an images' build list for given organization.
+      parameters:
+      - name: org_id
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ImageBuildResponse'
+      security:
+      - BasicAuth: []
+  /orgs/{org_id}/inventory/package_summaries:
+    get:
+      tags:
+      - Inventory
+      summary: List package summaries
+      description: Retrieves package summaries for a given organization and release
+        tags.
+      parameters:
+      - name: org_id
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      - name: release_tag
+        in: query
+        description: Release tags for which package summaries will be returned for
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VulnerablePackageSummary'
+      security:
+      - BasicAuth: []
+  /orgs/{org_id}/inventory/release_tags:
+    get:
+      tags:
+      - Inventory
+      summary: List release tags
+      description: Retrieves release tags for given organization.
+      parameters:
+      - name: org_id
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReleaseTag'
+      security:
+      - BasicAuth: []
+  /orgs/{org_id}/invites:
+    post:
+      tags:
+      - Invite
+      summary: Creates an organization invite
+      parameters:
+      - name: org_id
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Invite data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrgInviteRequest'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOrgInviteResponse'
+      security:
+      - BasicAuth: []
+      x-codegen-request-body-name: CreateOrgInviteRequest
+  /orgs/{org_id}/invites/{invite_id}/acceptance:
+    post:
+      tags:
+      - Invite
+      summary: Accepts an organization invite
+      description: |-
+        Accepts an organization invite and adds the authenticated user
+        to the organization with the specified role.
+      parameters:
+      - name: org_id
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      - name: invite_id
+        in: path
+        description: Invite ID
+        required: true
+        schema:
+          type: string
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrgRoleBinding'
+      security:
+      - BasicAuth: []
+  /orgs/{org_id}/role_bindings:
+    post:
+      tags:
+      - Organization
+      summary: Links account to an organization
+      description: "Links an account to organization, the lining information provided\
+        \ within payload."
+      parameters:
+      - name: org_id
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Role binding data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrgRoleBindingCreationRequest'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrgRoleBinding'
+      security:
+      - BasicAuth: []
+      x-codegen-request-body-name: OrgRoleBindingCreationRequest
+  /orgs/{org_id}/security_findings:
+    get:
+      tags:
+      - Security Findings
+      summary: List security findings
+      description: |-
+        Get list of security findings for an organization, specified by ID,
+        filtered by the release tag and the params for "package summary tuple":
+        package name, package ecosystem, package distro - where all or none of the tuple is required.
+      parameters:
+      - name: org_id
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      - name: release_tag
+        in: query
+        description: Release tag
+        schema:
+          type: string
+      - name: package_name
+        in: query
+        description: Package name
+        schema:
+          type: string
+      - name: package_ecosystem
+        in: query
+        description: Package ecosystem
+        schema:
+          type: string
+      - name: package_distro
+        in: query
+        description: Package distro
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SecurityFindingResource'
+      security:
+      - BasicAuth: []
+  /orgs/{org_id}/security_findings/report:
+    get:
+      tags:
+      - Security Findings
+      summary: Export a security findings file
+      description: "Export a detailed list of security findings for an organization,\
+        \ specified by release_tag."
+      parameters:
+      - name: org_id
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      - name: release_tag
+        in: query
+        description: Release tag
+        schema:
+          type: string
+      - name: format
+        in: query
+        description: "file format, surrently supports 'csv'"
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+      security:
+      - BasicAuth: []
+  /orgs/{org_id}/security_findings/{finding_id}/comments:
+    post:
+      tags:
+      - Security Findings
+      summary: Adds a comment to a security finding
+      description: |-
+        Add a comment (or a reply to a comment) to a security finding.
+        A reply is defined as a comment with a parent comment id.
+      parameters:
+      - name: org_id
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      - name: finding_id
+        in: path
+        description: Security finding ID
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Comment and parent id (if its a reply) data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/securityfindings.commentRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityFindingResource'
+      security:
+      - BasicAuth: []
+      x-codegen-request-body-name: commentRequest
+  /orgs/{org_id}/security_findings/{finding_id}/status:
+    put:
+      tags:
+      - Security Findings
+      summary: Updates security finding status and resolution
+      description: |-
+        Resolution can be updated only if the current status is Mitigated/Closed, or if the provided
+        status is Mitigated or Closed. Resolution is Mandatory if moving from a status that is not
+        Mitigated/Closed to Mitigated/Closed
+      parameters:
+      - name: org_id
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      - name: finding_id
+        in: path
+        description: Security finding ID
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Status and Resolution update data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/securityfindings.statusUpdateRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SecurityFindingResource'
+      security:
+      - BasicAuth: []
+      x-codegen-request-body-name: status_update_request
+  /orgs/{org_id}/vscan_reports/upload:
+    post:
+      tags:
+      - VScan Reports
+      summary: Upload VScan Report
+      description: Accepts a VScan report file and processes it on behalf of the organization.
+      parameters:
+      - name: org_id
+        in: path
+        description: Organization ID
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - file
+              - scanner_name
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: VSscan report file
+                  format: binary
+                scanner_name:
+                  type: string
+                  description: Scanner name
+        required: true
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VscanReportUpload'
+      security:
+      - BasicAuth: []
+components:
+  schemas:
+    APIKey:
+      type: object
+      properties:
+        account_id:
+          type: string
+        active:
+          type: boolean
+        created_at:
+          type: string
+        expires_at:
+          type: string
+        id:
+          type: string
+        key:
+          type: string
+        name:
+          type: string
+        updated_at:
+          type: string
+    Account:
+      required:
+      - email
+      - external_id
+      - name
+      type: object
+      properties:
+        created_at:
+          type: string
+        email:
+          type: string
+        external_id:
+          type: string
+        id:
+          type: string
+        last_login_at:
+          type: string
+        name:
+          type: string
+        org_role_bindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrgRoleBinding'
+        provider:
+          type: string
+        updated_at:
+          type: string
+    CreateAPIKeyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+    CreateOrgInviteRequest:
+      required:
+      - role
+      type: object
+      properties:
+        role:
+          type: string
+          enum:
+          - member
+          - admin
+    CreateOrgInviteResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+    CreateOrganizationRequest:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+    ImageBuildResponse:
+      type: object
+      properties:
+        digest:
+          type: string
+        id:
+          type: string
+        repository:
+          type: string
+        scanned_at:
+          type: string
+        tag:
+          type: string
+    OrgRoleBinding:
+      required:
+      - account_id
+      - organization_id
+      - role
+      type: object
+      properties:
+        account_id:
+          type: string
+        created_at:
+          type: string
+        id:
+          type: string
+        organization:
+          $ref: '#/components/schemas/Organization'
+        organization_id:
+          type: string
+        role:
+          type: string
+        updated_at:
+          type: string
+    OrgRoleBindingCreationRequest:
+      required:
+      - account_id
+      - role
+      type: object
+      properties:
+        account_id:
+          type: string
+        role:
+          type: string
+    Organization:
+      type: object
+      properties:
+        created_at:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        updated_at:
+          type: string
+    ReleaseTag:
+      type: object
+      properties:
+        tag:
+          type: string
+    SecurityFindingResource:
+      type: object
+      properties:
+        activities:
+          $ref: '#/components/schemas/securityfindings.SecurityFindingActivityResource'
+        cvss:
+          type: number
+        cvss_vector:
+          type: string
+        description:
+          type: string
+        discovered_at:
+          type: string
+        external_vuln_id:
+          type: string
+        fixed_in:
+          type: string
+        id:
+          type: string
+        image_build_digest:
+          type: string
+        image_build_repo:
+          type: string
+        image_build_tag:
+          type: string
+        nvd_link:
+          type: string
+        package_distro:
+          type: string
+        package_ecosystem:
+          type: string
+        package_name:
+          type: string
+        package_version:
+          type: string
+        published_at:
+          type: string
+        resolution:
+          $ref: '#/components/schemas/entities.Resolution'
+        scanner_name:
+          $ref: '#/components/schemas/entities.ScannerName'
+        severity:
+          $ref: '#/components/schemas/entities.SecurityFindingSeverity'
+        status:
+          $ref: '#/components/schemas/entities.FindingStatus'
+    VscanReportUpload:
+      type: object
+      properties:
+        created_at:
+          type: string
+        external_scan_ids:
+          type: string
+        file_url:
+          type: string
+        id:
+          type: string
+        organization_id:
+          type: string
+        scanner_name:
+          $ref: '#/components/schemas/entities.ScannerName'
+        status:
+          $ref: '#/components/schemas/entities.VscanReportUploadStatus'
+        updated_at:
+          type: string
+    VulnerablePackageSummary:
+      type: object
+      properties:
+        critical:
+          type: integer
+        ecosystem:
+          type: string
+        high:
+          type: integer
+        impacted_versions:
+          type: array
+          items:
+            type: string
+        low:
+          type: integer
+        medium:
+          type: integer
+        name:
+          type: string
+        os_distro_release:
+          type: string
+    entities.FindingStatus:
+      type: string
+      enum:
+      - Open
+      - AwaitingAnalysis
+      - InvestigationInProgress
+      - Affected
+      - Mitigated
+      - Closed
+      x-enum-varnames:
+      - Open
+      - AwaitingAnalysis
+      - Investigation
+      - Affected
+      - Mitigated
+      - Closed
+    entities.Resolution:
+      type: string
+      enum:
+      - FixedOrPatched
+      - WillPatch
+      - AwaitingPatchAvailability
+      - ComponentNotPresent
+      - VulnerableCodeNotPresent
+      - VulnerableCodeNotInExecPath
+      - VulnerableCodeCantBeControlledByAdversary
+      - InlineMitigationAlreadyExists
+      x-enum-varnames:
+      - FixedOrPatched
+      - WillPatch
+      - AwaitingPatch
+      - ComponentNotPresent
+      - VulnerableCodeNotPresent
+      - VulnerableCodeNotInExecPath
+      - VulnerableCodeCantBeControlledByAdversary
+      - InlineMitigationAlreadyExists
+    entities.ScannerName:
+      type: string
+      enum:
+      - Twistlock
+      x-enum-varnames:
+      - ScannerNameTwistlock
+    entities.SecurityFindingSeverity:
+      type: string
+      enum:
+      - Critical
+      - High
+      - Medium
+      - Low
+      - Unknown
+      x-enum-varnames:
+      - CriticalSeverity
+      - HighSeverity
+      - MediumSeverity
+      - LowSeverity
+      - UnknownSeverity
+    entities.VscanReportUploadStatus:
+      type: string
+      enum:
+      - PENDING
+      - IN_PROGRESS
+      - SUCCESS
+      - FAILED
+      x-enum-varnames:
+      - VscanReportUploadPending
+      - VscanReportUploadInProgress
+      - VscanReportUploadSuccess
+      - VscanReportUploadFailed
+    securityfindings.SecurityFindingActivityResource:
+      type: object
+      properties:
+        detailed:
+          type: array
+          items:
+            $ref: '#/components/schemas/securityfindings.SecurityFindingDetailedActivityResource'
+        summary:
+          $ref: '#/components/schemas/securityfindings.SecurityFindingActivitySummaryResource'
+    securityfindings.SecurityFindingActivitySummaryResource:
+      type: object
+      properties:
+        number_of_comments:
+          type: integer
+    securityfindings.SecurityFindingDetailedActivityResource:
+      type: object
+      properties:
+        account_id:
+          type: string
+        account_name:
+          type: string
+        activity:
+          type: string
+        comment:
+          type: string
+        comment_id:
+          type: string
+        comment_parent_id:
+          type: string
+        created_at:
+          type: string
+        new_status:
+          type: object
+          description: Activity specific
+          allOf:
+          - $ref: '#/components/schemas/entities.FindingStatus'
+        old_status:
+          $ref: '#/components/schemas/entities.FindingStatus'
+        resolution:
+          $ref: '#/components/schemas/entities.Resolution'
+    securityfindings.commentRequest:
+      type: object
+      properties:
+        comment:
+          type: string
+        parent_comment_id:
+          type: string
+    securityfindings.statusUpdateRequest:
+      type: object
+      properties:
+        resolution:
+          type: object
+          description: "nolint: lll"
+          allOf:
+          - $ref: '#/components/schemas/entities.Resolution'
+        status:
+          $ref: '#/components/schemas/entities.FindingStatus'
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+x-original-swagger-version: "2.0"
+
